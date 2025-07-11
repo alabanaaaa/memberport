@@ -25,13 +25,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     // Simulate login - in real app, this would call an API
-    const mockUser: User = {
-      id: '1',
-      name: 'John Doe',
-      email: email,
-      role: 'Member',
-      memberId: 'M001234'
-    };
+    let mockUser: User;
+    
+    // Check if admin login
+    if (email.includes('admin') || email.includes('officer')) {
+      mockUser = {
+        id: '1',
+        name: 'Admin User',
+        email: email,
+        role: 'Super Admin',
+        memberId: undefined
+      };
+    } else {
+      mockUser = {
+        id: '1',
+        name: 'John Doe',
+        email: email,
+        role: 'Member',
+        memberId: 'M001234'
+      };
+    }
     
     setUser(mockUser);
     localStorage.setItem('user', JSON.stringify(mockUser));

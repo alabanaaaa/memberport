@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AdminProvider } from './contexts/AdminContext';
 import { Layout } from './components/Layout/Layout';
+import { AdminLayout } from './components/Admin/AdminLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -10,6 +12,10 @@ import Claims from './pages/Claims';
 import Beneficiaries from './pages/Beneficiaries';
 import Medical from './pages/Medical';
 import Voting from './pages/Voting';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import MemberManagement from './pages/Admin/MemberManagement';
+import ApprovalsManagement from './pages/Admin/ApprovalsManagement';
+import BulkOperations from './pages/Admin/BulkOperations';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -23,6 +29,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
   
   return user ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  
+  const isAdmin = user && ['Super Admin', 'Pension Officer', 'Finance Officer', 'Medical Officer', 'Approver'].includes(user.role);
+  return isAdmin ? <>{children}</> : <Navigate to="/dashboard" />;
 };
 
 const AppContent: React.FC = () => {
@@ -83,6 +104,57 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         } />
         {/* Placeholder routes for other features */}
+        
+        {/* Admin Routes */}
+        <Route path="/admin/dashboard" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/members" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <MemberManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/approvals" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <ApprovalsManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/bulk" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <BulkOperations />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/*" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <div className="text-center py-8">
+                  <h1 className="text-2xl font-bold">Admin Module</h1>
+                  <p className="text-gray-600">This admin module is under development...</p>
+                </div>
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        
         <Route path="/reports" element={
           <ProtectedRoute>
             <Layout>
@@ -121,7 +193,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <AdminProvider>
+        <AppContent />
+      </AdminProvider>
     </AuthProvider>
   );
 };

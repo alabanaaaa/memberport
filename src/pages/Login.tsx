@@ -137,9 +137,16 @@ const Login: React.FC = () => {
                 <User className="h-4 w-4 mr-2" />
                 Register as New Member
               </Button>
-              <Button variant="secondary" className="w-full">
+              <Button 
+                variant="secondary" 
+                className="w-full"
+                onClick={() => {
+                  setEmail('admin@pension.com');
+                  setPassword('admin123');
+                }}
+              >
                 <Shield className="h-4 w-4 mr-2" />
-                Admin Login
+                Admin Login (Demo)
               </Button>
             </div>
           </div>
