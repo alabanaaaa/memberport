@@ -321,7 +321,7 @@ const BulkOperations: React.FC = () => {
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Always download and use the provided templates</li>
               <li>• Ensure data is validated before uploading</li>
-              <li>• Large files (>10MB) may take longer to process</li>
+              <li>• Large files ({'>'}10MB) may take longer to process</li>
               <li>• Operations can be paused or cancelled during processing</li>
               <li>• Failed records can be downloaded for correction and re-upload</li>
               <li>• All operations are logged and auditable</li>
