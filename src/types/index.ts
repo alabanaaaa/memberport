@@ -59,6 +59,15 @@ export interface Contribution {
 export interface Claim {
   id: string;
   memberId: string;
+  memberNumber: string;
+  memberName: string;
+  gender: 'Male' | 'Female';
+  previousNames?: string;
+  nationalId: string;
+  kraPin: string;
+  dateOfBirth: string;
+  permanentAddress: string;
+  claimFormNumber: string;
   claimType: 'Normal Retirement' | 'Early Retirement' | 'Death in Service' | 'Leaving Service' | 'Ill Health';
   amount: number;
   status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Paid';
@@ -71,6 +80,34 @@ export interface Claim {
     branchName: string;
     accountNumber: string;
   };
+  dateOfClaim: string;
+  dateOfLeaving?: string;
+  causeOfLeaving: string;
+  settlementDate?: string;
+  chequeNumber?: string;
+  dateOfCheque?: string;
+  examiner?: string;
+  rejectionReason?: string;
+  partialPayments: {
+    id: string;
+    amount: number;
+    date: string;
+    reference: string;
+    status: string;
+  }[];
+  deathDetails?: {
+    dateOfDeath: string;
+    causeOfDeath: string;
+    beneficiaries: string[];
+    spouse?: string;
+  };
+  drawDowns: {
+    id: string;
+    amount: number;
+    date: string;
+    purpose: string;
+    beneficiary: string;
+  }[];
 }
 
 export interface MedicalClaim {

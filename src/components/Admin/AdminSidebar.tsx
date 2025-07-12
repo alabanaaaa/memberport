@@ -26,7 +26,7 @@ const adminNavigation = [
   { name: 'Member Management', href: '/admin/members', icon: Users },
   { name: 'Approvals', href: '/admin/approvals', icon: UserCheck },
   { name: 'Contributions', href: '/admin/contributions', icon: DollarSign },
-  { name: 'Claims', href: '/admin/claims', icon: FileText },
+  { name: 'Claims Management', href: '/admin/claims', icon: FileText },
   { name: 'Medical', href: '/admin/medical', icon: Heart },
   { name: 'Voting', href: '/admin/voting', icon: Vote },
   { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
