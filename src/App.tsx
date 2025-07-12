@@ -17,6 +17,7 @@ import MemberManagement from './pages/Admin/MemberManagement';
 import ApprovalsManagement from './pages/Admin/ApprovalsManagement';
 import BulkOperations from './pages/Admin/BulkOperations';
 import ClaimsManagement from './pages/Admin/ClaimsManagement';
+import ContributionManagement from './pages/Admin/ContributionManagement';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -148,6 +149,15 @@ const AppContent: React.FC = () => {
             <AdminProvider>
               <AdminLayout>
                 <ClaimsManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/contributions" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <ContributionManagement />
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>

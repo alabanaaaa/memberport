@@ -25,7 +25,7 @@ const adminNavigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Member Management', href: '/admin/members', icon: Users },
   { name: 'Approvals', href: '/admin/approvals', icon: UserCheck },
-  { name: 'Contributions', href: '/admin/contributions', icon: DollarSign },
+  { name: 'Contribution Management', href: '/admin/contributions', icon: DollarSign },
   { name: 'Claims Management', href: '/admin/claims', icon: FileText },
   { name: 'Medical', href: '/admin/medical', icon: Heart },
   { name: 'Voting', href: '/admin/voting', icon: Vote },

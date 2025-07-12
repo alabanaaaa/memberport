@@ -46,14 +46,85 @@ export interface Beneficiary {
 export interface Contribution {
   id: string;
   memberId: string;
+  memberNumber: string;
+  sponsorId: string;
+  sponsorCode: string;
+  sponsorName: string;
   period: string;
+  department: string;
+  basicSalary: number;
   employeeContribution: number;
+  employeeContributionRate: number;
   employerContribution: number;
+  employerContributionRate: number;
   additionalVoluntary: number;
   totalContribution: number;
-  paymentMethod: 'Cheque' | 'Bank Transfer' | 'MPESA' | 'Standing Order';
-  status: 'Pending' | 'Confirmed' | 'Rejected';
+  cumulativeEmployeeContribution: number;
+  cumulativeEmployerContribution: number;
+  cumulativeTotal: number;
+  contributionType: 'Registered' | 'Unregistered';
+  paymentMethod: 'Cheque' | 'Bank Transfer' | 'MPESA' | 'Standing Order' | 'Cash' | 'EDI';
+  status: 'Pending' | 'Confirmed' | 'Rejected' | 'On Hold' | 'Reconciled';
+  receiptNumber?: string;
+  chequeNumber?: string;
+  bankDetails?: string;
+  custodianBank?: string;
+  receiptDate?: string;
+  reconciliationStatus: 'Pending' | 'Matched' | 'Discrepancy' | 'Resolved';
+  discrepancyReason?: string;
+  previousMonthAmount?: number;
+  difference?: number;
+  isAllocated: boolean;
   createdAt: string;
+  processedBy?: string;
+  approvedBy?: string;
+}
+
+export interface Sponsor {
+  id: string;
+  sponsorCode: string;
+  sponsorName: string;
+  contactPerson: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  totalEmployees: number;
+  activeMembers: number;
+  standardEmployeeRate: number;
+  standardEmployerRate: number;
+  paymentMethod: string;
+  bankDetails: string;
+  status: 'Active' | 'Inactive' | 'Suspended';
+  lastContributionDate: string;
+  totalContributions: number;
+  createdAt: string;
+}
+
+export interface ContributionSchedule {
+  id: string;
+  sponsorId: string;
+  sponsorCode: string;
+  period: string;
+  totalEmployees: number;
+  totalEmployeeContribution: number;
+  totalEmployerContribution: number;
+  totalAVC: number;
+  grandTotal: number;
+  status: 'Draft' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Posted';
+  submittedDate: string;
+  submittedBy: string;
+  reviewedBy?: string;
+  reviewedDate?: string;
+  contributions: Contribution[];
+  reconciliationNotes?: string;
+  discrepancies: {
+    type: 'New Employee' | 'Salary Change' | 'Retirement' | 'Termination' | 'Rate Change';
+    memberId: string;
+    memberName: string;
+    description: string;
+    previousValue: any;
+    currentValue: any;
+  }[];
 }
 
 export interface Claim {
