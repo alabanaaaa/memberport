@@ -12,6 +12,7 @@ export interface Member {
   nationalId: string;
   kraPin: string;
   dateOfJoining: string;
+  dateOfDeath?: string;
   designation: string;
   maritalStatus: 'Single' | 'Married' | 'Separated' | 'Divorced' | 'Widow';
   spouseName?: string;
@@ -26,9 +27,95 @@ export interface Member {
   lastContribution: string;
   expectedRetirement: string;
   profilePicture?: string;
+  postalAddress?: string;
+  withdrawalHistory: WithdrawalRecord[];
+  familyMembers: FamilyMember[];
   createdAt: string;
   updatedAt: string;
   updatedBy: string;
+}
+
+export interface WithdrawalRecord {
+  id: string;
+  memberId: string;
+  amount: number;
+  type: 'Partial Withdrawal' | 'Emergency Withdrawal' | 'Loan' | 'Advance';
+  reason: string;
+  date: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Paid';
+  approvedBy?: string;
+  paymentMethod: string;
+  bankReference?: string;
+}
+
+export interface FamilyMember {
+  id: string;
+  memberId: string;
+  name: string;
+  relationship: string;
+  dateOfBirth: string;
+  idNumber?: string;
+  medicalLimitInpatient: number;
+  medicalLimitOutpatient: number;
+  medicalExpenditure: number;
+  isActive: boolean;
+}
+
+export interface FamilyExpenditure {
+  id: string;
+  memberId: string;
+  familyMemberId?: string;
+  type: 'Medical' | 'Education' | 'Welfare' | 'Emergency';
+  description: string;
+  amount: number;
+  date: string;
+  provider: string;
+  receiptNumber: string;
+  status: 'Pending' | 'Approved' | 'Paid';
+}
+
+export interface HospitalAccount {
+  id: string;
+  hospitalName: string;
+  contactPerson: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
+  accountBalance: number;
+  totalClaims: number;
+  pendingBills: number;
+  overdueAmount: number;
+  lastPaymentDate: string;
+  paymentTerms: number; // days
+  isActive: boolean;
+}
+
+export interface HospitalBill {
+  id: string;
+  hospitalId: string;
+  memberId: string;
+  familyMemberId?: string;
+  billNumber: string;
+  amount: number;
+  billDate: string;
+  dueDate: string;
+  status: 'Pending' | 'Approved' | 'Paid' | 'Overdue';
+  daysPending: number;
+  treatmentType: 'Inpatient' | 'Outpatient';
+  diagnosis: string;
+}
+
+export interface ContributionPayment {
+  id: string;
+  memberId: string;
+  amount: number;
+  type: 'Monthly' | 'Lump Sum' | 'AVC';
+  paymentMethod: 'MPESA' | 'Bank Transfer' | 'Cheque' | 'Cash';
+  paymentReference: string;
+  date: string;
+  status: 'Pending' | 'Confirmed' | 'Failed';
+  mpesaCode?: string;
+  bankReference?: string;
 }
 
 export interface Beneficiary {
@@ -40,6 +127,11 @@ export interface Beneficiary {
   idNumber: string;
   percentage: number;
   isActive: boolean;
+  phoneNumber?: string;
+  address?: string;
+  guardianName?: string;
+  guardianContact?: string;
+  documents: string[];
   createdAt: string;
 }
 
