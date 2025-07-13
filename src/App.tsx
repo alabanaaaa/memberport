@@ -51,11 +51,18 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppContent: React.FC = () => {
   const { user } = useAuth();
 
+  // Helper function to determine redirect path based on user role
+  const getRedirectPath = () => {
+    if (!user) return "/login";
+    const isAdmin = ['Super Admin', 'Pension Officer', 'Finance Officer', 'Medical Officer', 'Approver'].includes(user.role);
+    return isAdmin ? "/admin/dashboard" : "/dashboard";
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/login" element={user ? <Navigate to={getRedirectPath()} /> : <Login />} />
+        <Route path="/" element={<Navigate to={getRedirectPath()} />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Layout>
