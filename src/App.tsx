@@ -18,6 +18,14 @@ import ApprovalsManagement from './pages/Admin/ApprovalsManagement';
 import BulkOperations from './pages/Admin/BulkOperations';
 import ClaimsManagement from './pages/Admin/ClaimsManagement';
 import ContributionManagement from './pages/Admin/ContributionManagement';
+import MedicalAdministration from './pages/Admin/MedicalAdministration';
+import VotingManagement from './pages/Admin/VotingManagement';
+import SystemIntegrations from './pages/Admin/SystemIntegrations';
+import PortalManagement from './pages/Admin/PortalManagement';
+import ReportsAnalytics from './pages/Admin/ReportsAnalytics';
+import SystemConfiguration from './pages/Admin/SystemConfiguration';
+import SystemAlerts from './pages/Admin/SystemAlerts';
+import AuditTrail from './pages/Admin/AuditTrail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -165,6 +173,51 @@ const AppContent: React.FC = () => {
             <AdminProvider>
               <AdminLayout>
                 <ContributionManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/medical" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <MedicalAdministration />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/voting" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <VotingManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/integrations" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <SystemIntegrations />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/portal" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <PortalManagement />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/config" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <SystemConfiguration />
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>
