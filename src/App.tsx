@@ -17,6 +17,7 @@ import MemberManagement from './pages/Admin/MemberManagement';
 import ApprovalsManagement from './pages/Admin/ApprovalsManagement';
 import BulkOperations from './pages/Admin/BulkOperations';
 import ClaimsManagement from './pages/Admin/ClaimsManagement';
+import ClaimsProcessing from './pages/Admin/ClaimsProcessing';
 import ContributionManagement from './pages/Admin/ContributionManagement';
 import MedicalAdministration from './pages/Admin/MedicalAdministration';
 import VotingManagement from './pages/Admin/VotingManagement';
@@ -163,7 +164,7 @@ const AppContent: React.FC = () => {
           <AdminRoute>
             <AdminProvider>
               <AdminLayout>
-                <ClaimsManagement />
+                <ClaimsProcessing />
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>
