@@ -1,0 +1,182 @@
+graph TB
+    %% Frontend Layer
+    subgraph "Frontend Layer"
+        WEB[Web Portal - React/TypeScript]
+        MOBILE[Mobile App - React Native]
+        ADMIN[Admin Portal - React/TypeScript]
+    end
+
+    %% API Gateway
+    subgraph "API Gateway Layer"
+        GATEWAY[API Gateway - Express.js/Node.js]
+        AUTH[Authentication Service - JWT/OAuth2]
+        RATE[Rate Limiting & Throttling]
+        CORS[CORS & Security Headers]
+    end
+
+    %% Microservices Layer
+    subgraph "Core Services"
+        MEMBER[Member Management Service]
+        CONTRIB[Contribution Management Service]
+        CLAIMS[Claims Processing Service]
+        MEDICAL[Medical Administration Service]
+        VOTING[Voting Management Service]
+        BENEFICIARY[Beneficiary Management Service]
+        AUDIT[Audit Trail Service]
+        NOTIFICATION[Notification Service]
+        REPORTING[Reporting Service]
+        INTEGRATION[Integration Service]
+    end
+
+    %% Business Logic Layer
+    subgraph "Business Logic Services"
+        WORKFLOW[Workflow Engine - Maker/Checker]
+        CALCULATION[Calculation Engine]
+        VALIDATION[Data Validation Service]
+        RECONCILIATION[Reconciliation Engine]
+        BULK[Bulk Processing Service]
+        SCHEDULER[Task Scheduler Service]
+    end
+
+    %% Data Access Layer
+    subgraph "Data Access Layer"
+        MEMBER_REPO[Member Repository]
+        CONTRIB_REPO[Contribution Repository]
+        CLAIMS_REPO[Claims Repository]
+        MEDICAL_REPO[Medical Repository]
+        AUDIT_REPO[Audit Repository]
+        CACHE_LAYER[Redis Cache Layer]
+    end
+
+    %% Database Layer
+    subgraph "Database Layer"
+        MAIN_DB[(PostgreSQL - Main Database)]
+        AUDIT_DB[(PostgreSQL - Audit Database)]
+        CACHE_DB[(Redis - Cache & Sessions)]
+        SEARCH_DB[(Elasticsearch - Search & Analytics)]
+        FILE_STORAGE[(MinIO - File Storage)]
+    end
+
+    %% External Integrations
+    subgraph "External Systems"
+        ERP[ERP System Integration]
+        FINANCIAL[Financial Management System]
+        GL[General Ledger]
+        AR[Accounts Receivable]
+        AP[Accounts Payable]
+        CASH[Cash Management]
+        DMS[Document Management System]
+        SMS[SMS Gateway]
+        EMAIL[Email Service]
+        MPESA[MPESA API]
+        BANK[Banking APIs]
+        KRA[KRA Integration]
+        USSD[USSD Gateway]
+    end
+
+    %% Security Layer
+    subgraph "Security & Monitoring"
+        SECURITY[Security Service]
+        ENCRYPTION[Encryption Service]
+        BACKUP[Backup Service]
+        MONITORING[System Monitoring]
+        LOGGING[Centralized Logging]
+        ALERTS[Alert Management]
+    end
+
+    %% Infrastructure Layer
+    subgraph "Infrastructure"
+        LOAD_BALANCER[Load Balancer]
+        CONTAINER[Docker Containers]
+        ORCHESTRATION[Kubernetes/Docker Compose]
+        CI_CD[CI/CD Pipeline]
+    end
+
+    %% Connections
+    WEB --> GATEWAY
+    MOBILE --> GATEWAY
+    ADMIN --> GATEWAY
+
+    GATEWAY --> AUTH
+    GATEWAY --> RATE
+    GATEWAY --> CORS
+
+    GATEWAY --> MEMBER
+    GATEWAY --> CONTRIB
+    GATEWAY --> CLAIMS
+    GATEWAY --> MEDICAL
+    GATEWAY --> VOTING
+    GATEWAY --> BENEFICIARY
+    GATEWAY --> AUDIT
+    GATEWAY --> NOTIFICATION
+    GATEWAY --> REPORTING
+    GATEWAY --> INTEGRATION
+
+    MEMBER --> WORKFLOW
+    CONTRIB --> CALCULATION
+    CLAIMS --> VALIDATION
+    MEDICAL --> RECONCILIATION
+    VOTING --> BULK
+    BENEFICIARY --> SCHEDULER
+
+    MEMBER --> MEMBER_REPO
+    CONTRIB --> CONTRIB_REPO
+    CLAIMS --> CLAIMS_REPO
+    MEDICAL --> MEDICAL_REPO
+    AUDIT --> AUDIT_REPO
+
+    MEMBER_REPO --> CACHE_LAYER
+    CONTRIB_REPO --> CACHE_LAYER
+    CLAIMS_REPO --> CACHE_LAYER
+    MEDICAL_REPO --> CACHE_LAYER
+    AUDIT_REPO --> CACHE_LAYER
+
+    CACHE_LAYER --> MAIN_DB
+    AUDIT_REPO --> AUDIT_DB
+    CACHE_LAYER --> CACHE_DB
+    REPORTING --> SEARCH_DB
+    MEMBER --> FILE_STORAGE
+
+    INTEGRATION --> ERP
+    INTEGRATION --> FINANCIAL
+    INTEGRATION --> GL
+    INTEGRATION --> AR
+    INTEGRATION --> AP
+    INTEGRATION --> CASH
+    INTEGRATION --> DMS
+    NOTIFICATION --> SMS
+    NOTIFICATION --> EMAIL
+    CONTRIB --> MPESA
+    CONTRIB --> BANK
+    MEMBER --> KRA
+    VOTING --> USSD
+
+    SECURITY --> ENCRYPTION
+    MONITORING --> LOGGING
+    MONITORING --> ALERTS
+    BACKUP --> MAIN_DB
+    BACKUP --> AUDIT_DB
+
+    LOAD_BALANCER --> GATEWAY
+    CONTAINER --> ORCHESTRATION
+    CI_CD --> CONTAINER
+
+    %% Styling
+    classDef frontend fill:#e1f5fe
+    classDef api fill:#f3e5f5
+    classDef service fill:#e8f5e8
+    classDef data fill:#fff3e0
+    classDef database fill:#ffebee
+    classDef external fill:#f1f8e9
+    classDef security fill:#fce4ec
+    classDef infrastructure fill:#e0f2f1
+
+    class WEB,MOBILE,ADMIN frontend
+    class GATEWAY,AUTH,RATE,CORS api
+    class MEMBER,CONTRIB,CLAIMS,MEDICAL,VOTING,BENEFICIARY,AUDIT,NOTIFICATION,REPORTING,INTEGRATION service
+    class WORKFLOW,CALCULATION,VALIDATION,RECONCILIATION,BULK,SCHEDULER service
+    class MEMBER_REPO,CONTRIB_REPO,CLAIMS_REPO,MEDICAL_REPO,AUDIT_REPO,CACHE_LAYER data
+    class MAIN_DB,AUDIT_DB,CACHE_DB,SEARCH_DB,FILE_STORAGE database
+    class ERP,FINANCIAL,GL,AR,AP,CASH,DMS,SMS,EMAIL,MPESA,BANK,KRA,USSD external
+    class SECURITY,ENCRYPTION,BACKUP,MONITORING,LOGGING,ALERTS security
+    class LOAD_BALANCER,CONTAINER,ORCHESTRATION,CI_CD infrastructure
