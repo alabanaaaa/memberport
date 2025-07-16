@@ -1,0 +1,315 @@
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  firstName    String
+  lastName     String
+  memberNumber String?   @unique
+  role         String    @default("Member")
+  isActive     Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relations
+  member              Member?
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+  
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+model Member {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  memberNumber            String    @unique
+  nationalId              String?   @unique
+  kraPin                  String?
+  dateOfBirth             DateTime?
+  gender                  String?
+  nationality             String?
+  phoneNumber             String?
+  maritalStatus           String?
+  spouseName              String?
+  designation             String?
+  basicSalary             Decimal?
+  accountBalance          Decimal   @default(0)
+  contributionRate        Decimal   @default(0)
+  sponsorContributionRate Decimal   @default(0)
+  medicalLimitInpatient   Decimal   @default(0)
+  medicalLimitOutpatient  Decimal   @default(0)
+  exGratia                Decimal   @default(0)
+  dateOfJoining           DateTime?
+  expectedRetirement      DateTime?
+  membershipStatus        String    @default("Active")
+  profilePicture          String?
+  postalAddress           String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beneficiaries Beneficiary[]
+  contributions Contribution[]
+  claims        Claim[]
+  medicalRecords MedicalRecord[]
+  familyMembers FamilyMember[]
+  
+  @@map("members")
+}
+
+model Beneficiary {
+  id           String   @id @default(cuid())
+  memberId     String
+  name         String
+  relationship String
+  dateOfBirth  DateTime
+  idNumber     String
+  percentage   Decimal
+  phoneNumber  String?
+  address      String?
+  guardianName String?
+  guardianContact String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  @@map("beneficiaries")
+}
+
+model Contribution {
+  id                            String   @id @default(cuid())
+  memberId                      String
+  memberNumber                  String
+  sponsorId                     String?
+  sponsorCode                   String?
+  sponsorName                   String?
+  period                        String
+  department                    String?
+  basicSalary                   Decimal
+  employeeContribution          Decimal
+  employeeContributionRate      Decimal
+  employerContribution          Decimal
+  employerContributionRate      Decimal
+  additionalVoluntary           Decimal  @default(0)
+  totalContribution             Decimal
+  cumulativeEmployeeContribution Decimal @default(0)
+  cumulativeEmployerContribution Decimal @default(0)
+  cumulativeTotal               Decimal  @default(0)
+  contributionType              String   @default("Registered")
+  paymentMethod                 String
+  status                        String   @default("Pending")
+  receiptNumber                 String?
+  chequeNumber                  String?
+  bankDetails                   String?
+  custodianBank                 String?
+  receiptDate                   DateTime?
+  reconciliationStatus          String   @default("Pending")
+  discrepancyReason             String?
+  previousMonthAmount           Decimal?
+  difference                    Decimal?
+  isAllocated                   Boolean  @default(false)
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+  processedBy                   String?
+  approvedBy                    String?
+  
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  @@map("contributions")
+}
+
+model Claim {
+  id               String   @id @default(cuid())
+  memberId         String
+  claimNumber      String   @unique
+  claimType        String
+  amount           Decimal
+  description      String?
+  submissionDate   DateTime @default(now())
+  status           String   @default("Pending")
+  approvedBy       String?
+  approvedAt       DateTime?
+  rejectedReason   String?
+  paymentDate      DateTime?
+  paymentMethod    String?
+  paymentReference String?
+  documents        String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  @@map("claims")
+}
+
+model MedicalRecord {
+  id                  String   @id @default(cuid())
+  memberId            String
+  familyMemberId      String?
+  providerName        String
+  treatmentDate       DateTime
+  treatmentType       String
+  diagnosis           String?
+  amount              Decimal
+  claimAmount         Decimal
+  approvedAmount      Decimal?
+  status              String   @default("Pending")
+  receiptNumber       String?
+  documents           String[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  member       Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  familyMember FamilyMember? @relation(fields: [familyMemberId], references: [id])
+  
+  @@map("medical_records")
+}
+
+model FamilyMember {
+  id                     String   @id @default(cuid())
+  memberId               String
+  name                   String
+  relationship           String
+  dateOfBirth            DateTime
+  idNumber               String?
+  medicalLimitInpatient  Decimal  @default(0)
+  medicalLimitOutpatient Decimal  @default(0)
+  medicalExpenditure     Decimal  @default(0)
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  // Relations
+  member         Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  medicalRecords MedicalRecord[]
+  
+  @@map("family_members")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  resource  String
+  resourceId String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("audit_logs")
+}
+
+model VotingEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  status      String   @default("Draft")
+  candidates  Json[]
+  results     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  votes Vote[]
+  
+  @@map("voting_events")
+}
+
+model Vote {
+  id             String   @id @default(cuid())
+  votingEventId  String
+  memberNumber   String
+  candidateId    String
+  timestamp      DateTime @default(now())
+  
+  // Relations
+  votingEvent VotingEvent @relation(fields: [votingEventId], references: [id], onDelete: Cascade)
+  
+  @@unique([votingEventId, memberNumber])
+  @@map("votes")
+}
+
+model Sponsor {
+  id                      String   @id @default(cuid())
+  sponsorCode             String   @unique
+  sponsorName             String
+  contactPerson           String?
+  email                   String?
+  phoneNumber             String?
+  address                 String?
+  totalEmployees          Int      @default(0)
+  activeMembers           Int      @default(0)
+  standardEmployeeRate    Decimal  @default(0)
+  standardEmployerRate    Decimal  @default(0)
+  paymentMethod           String?
+  bankDetails             String?
+  status                  String   @default("Active")
+  lastContributionDate    DateTime?
+  totalContributions      Decimal  @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  @@map("sponsors")
+}
+
+model SystemSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("system_settings")
+}

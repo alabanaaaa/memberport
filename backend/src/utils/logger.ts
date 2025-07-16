@@ -1,77 +1,64 @@
 import winston from 'winston';
-import path from 'path';
-import fs from 'fs';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import { config } from '@/config/app';
 
-// Create logs directory if it doesn't exist
-const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
+const { combine, timestamp, errors, json, printf, colorize } = winston.format;
 
-// Define log levels
-const levels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  http: 3,
-  debug: 4,
-};
-
-// Define colors for each level
-const colors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  debug: 'white',
-};
-
-// Add colors to winston
-winston.addColors(colors);
-
-// Define log format
-const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
-);
-
-// Define file format (without colors)
-const fileFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
-);
-
-// Define which transports the logger must use
-const transports = [
-  // Console transport
-  new winston.transports.Console({
-    format: format,
-    level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
-  }),
-  // File transport for errors
-  new winston.transports.File({
-    filename: path.join(logsDir, 'error.log'),
-    level: 'error',
-    format: fileFormat,
-  }),
-  // File transport for all logs
-  new winston.transports.File({
-    filename: path.join(logsDir, 'combined.log'),
-    format: fileFormat,
-  }),
-];
-
-// Create the logger
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  levels,
-  format,
-  transports,
+// Custom log format for console
+const consoleFormat = printf(({ level, message, timestamp, stack }) => {
+  return `${timestamp} [${level}]: ${stack || message}`;
 });
 
-export { logger };
+// Create logger instance
+const logger = winston.createLogger({
+  level: config.logging.level,
+  format: combine(
+    timestamp(),
+    errors({ stack: true }),
+    json()
+  ),
+  transports: [
+    // Console transport
+    new winston.transports.Console({
+      format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        consoleFormat
+      ),
+    }),
+    
+    // File transport for all logs
+    new DailyRotateFile({
+      filename: 'logs/memberport-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: config.logging.file.maxSize,
+      maxFiles: config.logging.file.maxFiles,
+      zippedArchive: true,
+    }),
+    
+    // Separate file for errors
+    new DailyRotateFile({
+      filename: 'logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      maxSize: config.logging.file.maxSize,
+      maxFiles: config.logging.file.maxFiles,
+      zippedArchive: true,
+    }),
+  ],
+  exceptionHandlers: [
+    new winston.transports.File({ filename: 'logs/exceptions.log' }),
+  ],
+  rejectionHandlers: [
+    new winston.transports.File({ filename: 'logs/rejections.log' }),
+  ],
+});
+
+// Create a stream object with a 'write' function for morgan
+const stream = {
+  write: (message: string) => {
+    logger.info(message.trim());
+  },
+};
+
+export { logger, stream };

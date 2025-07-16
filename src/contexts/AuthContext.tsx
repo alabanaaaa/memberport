@@ -4,8 +4,21 @@ import { User } from '../types';
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
+}
+
+interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  memberNumber: string;
+  dateOfBirth: string;
+  password: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,13 +63,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('user', JSON.stringify(mockUser));
   };
 
+  const register = async (userData: RegisterData) => {
+    // Simulate API call - in real app, this would call the backend
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // For demo purposes, create a mock user
+    const mockUser: User = {
+      id: '2',
+      name: `${userData.firstName} ${userData.lastName}`,
+      email: userData.email,
+      role: 'Member',
+      memberId: userData.memberNumber
+    };
+    
+    setUser(mockUser);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+  };
+
+  const forgotPassword = async (email: string) => {
+    // Simulate API call - in real app, this would call the backend
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // For demo purposes, we'll just simulate success
+    console.log('Password reset email sent to:', email);
+  };
+
+  const resetPassword = async (token: string, password: string) => {
+    // Simulate API call - in real app, this would call the backend
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // For demo purposes, we'll just simulate success
+    console.log('Password reset successful for token:', token);
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, forgotPassword, resetPassword, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

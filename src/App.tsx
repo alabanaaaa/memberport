@@ -5,6 +5,9 @@ import { AdminProvider } from './contexts/AdminContext';
 import { Layout } from './components/Layout/Layout';
 import { AdminLayout } from './components/Admin/AdminLayout';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Contributions from './pages/Contributions';
@@ -16,17 +19,11 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import MemberManagement from './pages/Admin/MemberManagement';
 import ApprovalsManagement from './pages/Admin/ApprovalsManagement';
 import BulkOperations from './pages/Admin/BulkOperations';
-import ClaimsManagement from './pages/Admin/ClaimsManagement';
 import ClaimsProcessing from './pages/Admin/ClaimsProcessing';
 import ContributionManagement from './pages/Admin/ContributionManagement';
 import MedicalAdministration from './pages/Admin/MedicalAdministration';
 import VotingManagement from './pages/Admin/VotingManagement';
 import SystemIntegrations from './pages/Admin/SystemIntegrations';
-import PortalManagement from './pages/Admin/PortalManagement';
-import ReportsAnalytics from './pages/Admin/ReportsAnalytics';
-import SystemConfiguration from './pages/Admin/SystemConfiguration';
-import SystemAlerts from './pages/Admin/SystemAlerts';
-import AuditTrail from './pages/Admin/AuditTrail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -71,6 +68,9 @@ const AppContent: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/login" element={user ? <Navigate to={getRedirectPath()} /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to={getRedirectPath()} /> : <Register />} />
+        <Route path="/forgot-password" element={user ? <Navigate to={getRedirectPath()} /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={user ? <Navigate to={getRedirectPath()} /> : <ResetPassword />} />
         <Route path="/" element={<Navigate to={getRedirectPath()} />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -209,7 +209,10 @@ const AppContent: React.FC = () => {
           <AdminRoute>
             <AdminProvider>
               <AdminLayout>
-                <PortalManagement />
+                <div className="text-center py-8">
+                  <h1 className="text-2xl font-bold">Portal Management</h1>
+                  <p className="text-gray-600">Portal management module coming soon...</p>
+                </div>
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>
@@ -218,7 +221,10 @@ const AppContent: React.FC = () => {
           <AdminRoute>
             <AdminProvider>
               <AdminLayout>
-                <SystemConfiguration />
+                <div className="text-center py-8">
+                  <h1 className="text-2xl font-bold">System Configuration</h1>
+                  <p className="text-gray-600">System configuration module coming soon...</p>
+                </div>
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>

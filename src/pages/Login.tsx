@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '../components/Common/Card';
 import { Button } from '../components/Common/Button';
 import { useAuth } from '../contexts/AuthContext';
@@ -106,9 +107,9 @@ const Login: React.FC = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -133,10 +134,12 @@ const Login: React.FC = () => {
             </div>
 
             <div className="mt-6 space-y-3">
-              <Button variant="secondary" className="w-full">
-                <User className="h-4 w-4 mr-2" />
-                Register as New Member
-              </Button>
+              <Link to="/register">
+                <Button variant="secondary" className="w-full">
+                  <User className="h-4 w-4 mr-2" />
+                  Register as New Member
+                </Button>
+              </Link>
               <Button 
                 variant="secondary" 
                 className="w-full"

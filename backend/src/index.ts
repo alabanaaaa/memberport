@@ -1,140 +1,126 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Import routes
-import authRoutes from './routes/auth';
-import memberRoutes from './routes/members';
-import contributionRoutes from './routes/contributions';
-import claimRoutes from './routes/claims';
-import sponsorRoutes from './routes/sponsors';
-import beneficiaryRoutes from './routes/beneficiaries';
-import medicalRoutes from './routes/medical';
-import votingRoutes from './routes/voting';
-import adminRoutes from './routes/admin';
-import auditRoutes from './routes/audit';
-import uploadRoutes from './routes/upload';
-
-// Import middleware
-import { errorHandler } from './middleware/errorHandler';
-import { notFound } from './middleware/notFound';
-import { logger } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
 
+// Import configurations and middleware
+import { config } from '@/config/app';
+import { logger } from '@/utils/logger';
+import { errorHandler } from '@/api/middleware/errorHandler';
+import { notFound } from '@/api/middleware/notFound';
+import { rateLimiter } from '@/api/middleware/rateLimiter';
+import { apiRoutes } from '@/api/routes';
+import { setupSwagger } from '@/config/swagger';
+import { connectDatabase } from '@/config/database';
+import { connectRedis } from '@/config/redis';
+import { setupSocketIO } from '@/config/socket';
+
+// Create Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: config.cors.origin,
+    credentials: config.cors.credentials,
+  },
+});
 
 // Security middleware
 app.use(helmet());
+app.use(compression());
+
+// CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
+  origin: config.cors.origin,
+  credentials: config.cors.credentials,
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
-
-// General middleware
-app.use(compression());
-app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+// Request parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Logging middleware
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
+// Rate limiting
+app.use(rateLimiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV,
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
 // API routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/members', memberRoutes);
-app.use('/api/v1/contributions', contributionRoutes);
-app.use('/api/v1/claims', claimRoutes);
-app.use('/api/v1/sponsors', sponsorRoutes);
-app.use('/api/v1/beneficiaries', beneficiaryRoutes);
-app.use('/api/v1/medical', medicalRoutes);
-app.use('/api/v1/voting', votingRoutes);
-app.use('/api/v1/admin', adminRoutes);
-app.use('/api/v1/audit', auditRoutes);
-app.use('/api/v1/upload', uploadRoutes);
+app.use(config.apiPrefix, apiRoutes);
 
-// Error handling middleware
+// Setup Swagger documentation
+if (config.swagger.enabled) {
+  setupSwagger(app);
+}
+
+// Error handling middleware (must be last)
 app.use(notFound);
 app.use(errorHandler);
 
-// Database connection
-const connectDB = async () => {
+// Initialize services
+async function initializeServices() {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/memberport';
-    await mongoose.connect(mongoUri);
-    logger.info('MongoDB connected successfully');
+    // Connect to database
+    await connectDatabase();
+    logger.info('Database connected successfully');
+
+    // Connect to Redis
+    await connectRedis();
+    logger.info('Redis connected successfully');
+
+    // Setup Socket.IO
+    setupSocketIO(io);
+    logger.info('Socket.IO initialized');
+
+    // Start server
+    server.listen(config.port, () => {
+      logger.info(`Server running on port ${config.port}`);
+      logger.info(`Environment: ${config.nodeEnv}`);
+      logger.info(`API Documentation: http://localhost:${config.port}/api-docs`);
+    });
   } catch (error) {
-    logger.error('MongoDB connection error:', error);
+    logger.error('Failed to initialize services:', error);
     process.exit(1);
   }
-};
+}
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 // Graceful shutdown
-const gracefulShutdown = () => {
-  logger.info('Received shutdown signal, closing server...');
-  
-  mongoose.connection.close(false).then(() => {
-    logger.info('MongoDB connection closed');
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
     process.exit(0);
   });
-};
+});
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
-
-// Start server
-const startServer = async () => {
-  try {
-    await connectDB();
-    
-    const server = app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-    });
-
-    // Handle server errors
-    server.on('error', (error: any) => {
-      if (error.code === 'EADDRINUSE') {
-        logger.error(`Port ${PORT} is already in use`);
-      } else {
-        logger.error('Server error:', error);
-      }
-      process.exit(1);
-    });
-
-  } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
-
-startServer();
-
-export default app;
+// Initialize and start the application
+initializeServices();

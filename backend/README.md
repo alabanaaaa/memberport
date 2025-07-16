@@ -1,266 +1,290 @@
 # MemberPort Backend API
 
-A comprehensive Node.js/Express backend API for the MemberPort pension fund management system.
+A comprehensive backend API for the MemberPort pension fund management system built with Node.js, TypeScript, Express, and PostgreSQL.
 
 ## Features
 
-- **Authentication & Authorization** - JWT-based auth with role-based access control
-- **Member Management** - Complete CRUD operations for pension fund members
-- **Contribution Management** - Track employee/employer contributions and reconciliation
-- **Claims Processing** - Handle retirement, medical, and death benefit claims
-- **Beneficiary Management** - Manage member beneficiaries
-- **Medical Claims** - Process inpatient/outpatient medical claims
-- **Voting System** - Handle member voting sessions
-- **Admin Dashboard** - Comprehensive admin analytics and management
-- **Audit Logging** - Track all system changes
-- **File Upload** - Secure document upload functionality
-- **Bulk Operations** - Import/export data in bulk
+- **Authentication & Authorization**: JWT-based authentication with role-based access control
+- **Member Management**: Complete member lifecycle management
+- **Contribution Processing**: Handle pension contributions and reconciliation
+- **Claims Management**: Process retirement and benefit claims
+- **Medical Administration**: Manage medical claims and coverage
+- **Voting System**: Electronic voting for scheme elections
+- **Audit Trail**: Comprehensive logging and audit capabilities
+- **Real-time Updates**: WebSocket support for real-time notifications
+- **File Upload**: Support for document and image uploads
+- **API Documentation**: Swagger/OpenAPI documentation
 
 ## Tech Stack
 
-- **Runtime**: Node.js with TypeScript
+- **Runtime**: Node.js 18+
+- **Language**: TypeScript
 - **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT (JSON Web Tokens)
-- **File Upload**: Multer
-- **Validation**: Express Validator
+- **Database**: PostgreSQL with Prisma ORM
+- **Cache**: Redis
+- **Authentication**: JWT tokens
+- **Validation**: Joi schema validation
 - **Logging**: Winston
-- **Security**: Helmet, CORS, Rate Limiting
+- **Testing**: Jest
+- **API Documentation**: Swagger/OpenAPI
+- **Containerization**: Docker
 
-## Project Structure
-
-```
-src/
-├── index.ts              # Application entry point
-├── types/                # TypeScript type definitions
-├── models/               # Mongoose models
-├── routes/               # API route handlers
-│   ├── auth.ts          # Authentication routes
-│   ├── members.ts       # Member management
-│   ├── contributions.ts # Contribution management
-│   ├── claims.ts        # Claims processing
-│   ├── admin.ts         # Admin operations
-│   └── ...
-├── middleware/           # Custom middleware
-│   ├── auth.ts          # Authentication middleware
-│   ├── errorHandler.ts  # Error handling
-│   └── notFound.ts      # 404 handler
-└── utils/               # Utility functions
-    └── logger.ts        # Winston logging setup
-```
-
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- MongoDB (v4.4 or higher)
-- npm or yarn
+- Node.js 18 or higher
+- PostgreSQL 13 or higher
+- Redis 6 or higher
+- Docker & Docker Compose (optional)
 
 ### Installation
 
-1. **Install dependencies**:
+1. **Clone the repository**
    ```bash
-   cd backend
+   git clone <repository-url>
+   cd memberport/backend
+   ```
+
+2. **Install dependencies**
+   ```bash
    npm install
    ```
 
-2. **Environment setup**:
+3. **Environment setup**
    ```bash
    cp .env.example .env
-   ```
-   
-   Edit `.env` with your configuration:
-   ```env
-   PORT=5000
-   NODE_ENV=development
-   MONGODB_URI=mongodb://localhost:27017/memberport
-   JWT_SECRET=your-super-secret-jwt-key-here
-   JWT_EXPIRES_IN=24h
-   CORS_ORIGIN=http://localhost:3000
+   # Edit .env with your configuration
    ```
 
-3. **Start MongoDB** (if running locally):
+4. **Database setup**
    ```bash
-   mongod
+   # Generate Prisma client
+   npm run db:generate
+   
+   # Run migrations
+   npm run migrate
+   
+   # Seed database (optional)
+   npm run db:seed
    ```
 
-4. **Development server**:
+5. **Start development server**
    ```bash
    npm run dev
    ```
 
-5. **Production build**:
-   ```bash
-   npm run build
-   npm start
-   ```
+The API will be available at `http://localhost:3000`
+
+## Docker Setup
+
+### Using Docker Compose (Recommended)
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+This will start:
+- API server on port 3000
+- PostgreSQL on port 5432
+- Redis on port 6379
+- pgAdmin on port 8080
+- Redis Commander on port 8081
+
+### Manual Docker Build
+
+```bash
+# Build image
+docker build -t memberport-backend .
+
+# Run container
+docker run -p 3000:3000 memberport-backend
+```
+
+## API Documentation
+
+Once the server is running, visit:
+- **Swagger UI**: `http://localhost:3000/api-docs`
+- **Health Check**: `http://localhost:3000/health`
+
+## Environment Variables
+
+Key environment variables (see `.env.example` for complete list):
+
+```env
+# Server
+NODE_ENV=development
+PORT=3000
+
+# Database
+DATABASE_URL=postgresql://username:password@localhost:5432/memberport_db
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=24h
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-password
+```
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `GET /api/v1/auth/profile` - Get current user profile
-- `PUT /api/v1/auth/profile` - Update user profile
-- `PUT /api/v1/auth/change-password` - Change password
-- `POST /api/v1/auth/logout` - Logout user
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/refresh` - Refresh token
+- `POST /api/v1/auth/logout` - User logout
 
 ### Members
-- `GET /api/v1/members` - Get all members (Admin only)
+- `GET /api/v1/members` - Get all members (admin)
 - `GET /api/v1/members/:id` - Get member by ID
-- `POST /api/v1/members` - Create new member (Admin only)
-- `PUT /api/v1/members/:id` - Update member (Admin only)
-- `DELETE /api/v1/members/:id` - Deactivate member (Admin only)
-- `GET /api/v1/members/analytics/stats` - Get member statistics (Admin only)
+- `PUT /api/v1/members/:id` - Update member
+- `GET /api/v1/members/:id/dashboard` - Member dashboard
 
 ### Contributions
 - `GET /api/v1/contributions` - Get contributions
-- `GET /api/v1/contributions/:id` - Get contribution by ID
-- `POST /api/v1/contributions` - Create contribution (Admin only)
+- `POST /api/v1/contributions` - Create contribution
+- `GET /api/v1/contributions/:id` - Get contribution details
 
 ### Claims
 - `GET /api/v1/claims` - Get claims
-- `GET /api/v1/claims/:id` - Get claim by ID
-- `POST /api/v1/claims` - Submit new claim
+- `POST /api/v1/claims` - Submit claim
+- `PUT /api/v1/claims/:id` - Update claim status
 
-### Admin
-- `GET /api/v1/admin/dashboard` - Get admin dashboard data
-- `GET /api/v1/admin/approvals` - Get pending approvals
-- `GET /api/v1/admin/bulk-operations` - Get bulk operations
-- `GET /api/v1/admin/alerts` - Get system alerts
+### And many more...
 
-### File Upload
-- `POST /api/v1/upload/single` - Upload single file
-- `POST /api/v1/upload/multiple` - Upload multiple files
+## Database Schema
 
-## Authentication
+The application uses Prisma ORM with PostgreSQL. Key models include:
 
-The API uses JWT (JSON Web Tokens) for authentication. Include the token in the Authorization header:
-
-```
-Authorization: Bearer <your-jwt-token>
-```
-
-### User Roles
-
-- **Member** - Regular pension fund members
-- **Admin** - System administrators
-- **Pension Officer** - Pension fund officers
-- **Finance Officer** - Financial officers
-- **Medical Officer** - Medical claim officers
-- **Approver** - Approval workflow officers
-
-## Error Handling
-
-The API returns consistent error responses:
-
-```json
-{
-  "success": false,
-  "message": "Error description",
-  "errors": [] // Validation errors (when applicable)
-}
-```
-
-HTTP Status Codes:
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `500` - Internal Server Error
-
-## Data Models
-
-### Member
-Core member information including personal details, employment info, and pension settings.
-
-### Contribution
-Employee and employer contributions with reconciliation status.
-
-### Claim
-Retirement, medical, and death benefit claims processing.
-
-### Beneficiary
-Member beneficiaries for death benefits.
-
-### Audit Log
-Complete audit trail of all system changes.
+- **User**: Authentication and basic user info
+- **Member**: Extended member profile and pension details
+- **Contribution**: Monthly pension contributions
+- **Claim**: Retirement and benefit claims
+- **Beneficiary**: Member beneficiaries
+- **MedicalRecord**: Medical claims and coverage
+- **VotingEvent**: Electronic voting events
+- **AuditLog**: System audit trail
 
 ## Development
 
 ### Scripts
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build TypeScript to JavaScript
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm test` - Run tests
 
-### Testing
 ```bash
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+
+# Database
+npm run migrate      # Run database migrations
+npm run db:generate  # Generate Prisma client
+npm run db:seed      # Seed database
+npm run db:studio    # Open Prisma Studio
+
+# Testing
+npm run test         # Run tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
+
+# Linting
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint issues
+```
+
+### Project Structure
+
+```
+src/
+├── api/                 # API layer
+│   ├── controllers/     # Request handlers
+│   ├── middleware/      # Custom middleware
+│   └── routes/          # Route definitions
+├── business/            # Business logic
+├── config/              # Configuration files
+├── data/                # Data access layer
+├── external/            # External integrations
+├── security/            # Security utilities
+├── services/            # Core services
+├── types/               # TypeScript types
+└── utils/               # Utility functions
+```
+
+## Testing
+
+```bash
+# Run all tests
 npm test
-```
 
-### Database Seeding
-You can create sample data for development:
+# Run tests with coverage
+npm run test:coverage
 
-```javascript
-// Create admin user
-POST /api/v1/auth/register
-{
-  "name": "Admin User",
-  "email": "admin@memberport.com",
-  "password": "admin123",
-  "role": "Admin"
-}
-```
-
-## Deployment
-
-1. **Environment Variables**: Set all required environment variables
-2. **Database**: Ensure MongoDB is accessible
-3. **Build**: Run `npm run build`
-4. **Start**: Run `npm start`
-
-### Docker (Optional)
-```dockerfile
-FROM node:16-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 5000
-CMD ["npm", "start"]
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ## Security Features
 
-- JWT authentication
-- Password hashing with bcrypt
-- Rate limiting
-- CORS protection
-- Helmet security headers
-- Input validation
-- File upload restrictions
+- **JWT Authentication**: Secure token-based authentication
+- **Role-based Access Control**: Fine-grained permissions
+- **Rate Limiting**: Prevent abuse and DoS attacks
+- **Input Validation**: Comprehensive request validation
+- **SQL Injection Protection**: Prisma ORM protection
+- **CORS Configuration**: Cross-origin request handling
+- **Helmet.js**: Security headers
+- **Password Hashing**: bcrypt for secure password storage
 
-## Logging
+## Monitoring & Logging
 
-Logs are written to:
-- Console (development)
-- `logs/combined.log` (all logs)
-- `logs/error.log` (errors only)
+- **Winston Logging**: Structured logging with rotation
+- **Request Logging**: Morgan middleware for HTTP requests
+- **Error Tracking**: Comprehensive error handling
+- **Health Checks**: Built-in health check endpoints
+- **Performance Monitoring**: Request timing and metrics
+
+## Production Deployment
+
+### Environment Setup
+
+1. Set `NODE_ENV=production`
+2. Configure production database
+3. Set secure JWT secrets
+4. Configure SMTP for emails
+5. Set up SSL/TLS termination
+6. Configure reverse proxy (nginx)
+
+### Deployment Options
+
+- **Docker**: Use provided Dockerfile and docker-compose.yml
+- **PM2**: Process manager for Node.js apps
+- **Kubernetes**: Container orchestration
+- **Cloud Services**: AWS, Azure, Google Cloud
 
 ## Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Make changes
+2. Create a feature branch
+3. Make your changes
 4. Add tests
-5. Submit pull request
+5. Submit a pull request
 
 ## License
 
-MIT License - see LICENSE file for details
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions, please contact the development team or create an issue in the repository.
