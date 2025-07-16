@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { jwtValidationMiddleware, requireAdmin, requireMemberOrAdmin, AuthenticatedRequest } from './middleware/jwt';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,9 @@ app.use(limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply JWT validation middleware
+app.use(jwtValidationMiddleware);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -66,8 +70,8 @@ app.use(`${API_VERSION}/users`, createProxyMiddleware({
   },
 }));
 
-// Organization service proxy
-app.use(`${API_VERSION}/organizations`, createProxyMiddleware({
+// Organization service proxy (Admin only)
+app.use(`${API_VERSION}/organizations`, requireAdmin, createProxyMiddleware({
   target: process.env.ORGANIZATION_SERVICE_URL || 'http://localhost:3004',
   changeOrigin: true,
   pathRewrite: {
@@ -144,8 +148,8 @@ app.use(`${API_VERSION}/payments`, createProxyMiddleware({
   },
 }));
 
-// Analytics service proxy
-app.use(`${API_VERSION}/analytics`, createProxyMiddleware({
+// Analytics service proxy (Admin only)
+app.use(`${API_VERSION}/analytics`, requireAdmin, createProxyMiddleware({
   target: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010',
   changeOrigin: true,
   pathRewrite: {
