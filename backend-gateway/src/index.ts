@@ -2,7 +2,6 @@ import express, { Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { jwtValidationMiddleware, requireAdmin, requireMemberOrAdmin, AuthenticatedRequest } from './middleware/jwt';
 import {
@@ -24,6 +23,19 @@ import {
   Role,
   Permission
 } from './middleware/rbac';
+import {
+  createRateLimitMiddleware,
+  authRateLimit,
+  loginRateLimit,
+  passwordResetRateLimit,
+  strictRateLimit,
+  lenientRateLimit,
+  bypassRateLimit,
+  getRateLimitMetrics,
+  getRateLimitStatus,
+  rateLimitHealthCheck,
+  cleanup
+} from './middleware/rateLimiter';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,13 +52,8 @@ app.use(cors({
 // Request logging
 app.use(morgan('combined'));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
-app.use(limiter);
+// Global rate limiting (IP-based with role-based enhancements)
+app.use(createRateLimitMiddleware());
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -63,8 +70,11 @@ app.get('/health', (req, res) => {
 // API Gateway routes
 const API_VERSION = '/api/v1';
 
-// Authentication service proxy
-app.use(`${API_VERSION}/auth`, createProxyMiddleware({
+// Authentication service proxy with stricter rate limiting
+app.use(`${API_VERSION}/auth/login`, loginRateLimit);
+app.use(`${API_VERSION}/auth/reset-password`, passwordResetRateLimit);
+app.use(`${API_VERSION}/auth/forgot-password`, passwordResetRateLimit);
+app.use(`${API_VERSION}/auth`, authRateLimit, createProxyMiddleware({
   target: process.env.AUTH_SERVICE_URL || 'http://localhost:3002',
   changeOrigin: true,
   pathRewrite: {
@@ -260,6 +270,16 @@ app.get(`${API_VERSION}/rbac/roles`, rbacRequireAdmin, (req: AuthenticatedReques
   });
 });
 
+// Rate Limiting Management Endpoints
+// Get rate limiting metrics (Super Admin only)
+app.get(`${API_VERSION}/rate-limit/metrics`, requireSuperAdmin, getRateLimitMetrics);
+
+// Get current user's rate limit status
+app.get(`${API_VERSION}/rate-limit/status`, getRateLimitStatus);
+
+// Rate limiting health check
+app.get(`${API_VERSION}/rate-limit/health`, rateLimitHealthCheck);
+
 // Catch-all route for undefined endpoints
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
@@ -272,10 +292,42 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 });
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
   console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3001'}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
 });
+
+// Graceful shutdown handling
+const gracefulShutdown = async (signal: string) => {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+  
+  // Stop accepting new connections
+  server.close(async () => {
+    console.log('HTTP server closed.');
+    
+    try {
+      // Cleanup rate limiting resources
+      await cleanup();
+      console.log('Rate limiting cleanup completed.');
+      
+      // Exit the process
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during graceful shutdown:', error);
+      process.exit(1);
+    }
+  });
+  
+  // Force shutdown after timeout
+  setTimeout(() => {
+    console.log('Forcing shutdown after timeout');
+    process.exit(1);
+  }, 30000); // 30 second timeout
+};
+
+// Handle shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export default app;
