@@ -24,6 +24,10 @@ import ContributionManagement from './pages/Admin/ContributionManagement';
 import MedicalAdministration from './pages/Admin/MedicalAdministration';
 import VotingManagement from './pages/Admin/VotingManagement';
 import SystemIntegrations from './pages/Admin/SystemIntegrations';
+import ReportsAnalytics from './pages/Admin/ReportsAnalytics';
+import SystemAlerts from './pages/Admin/SystemAlerts';
+import AuditTrail from './pages/Admin/AuditTrail';
+import SurveysFeedback from './pages/Admin/SurveysFeedback';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -201,6 +205,42 @@ const AppContent: React.FC = () => {
             <AdminProvider>
               <AdminLayout>
                 <SystemIntegrations />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/reports" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <ReportsAnalytics />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/alerts" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <SystemAlerts />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/audit" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <AuditTrail />
+              </AdminLayout>
+            </AdminProvider>
+          </AdminRoute>
+        } />
+        <Route path="/admin/surveys" element={
+          <AdminRoute>
+            <AdminProvider>
+              <AdminLayout>
+                <SurveysFeedback />
               </AdminLayout>
             </AdminProvider>
           </AdminRoute>

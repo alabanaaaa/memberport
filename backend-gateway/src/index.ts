@@ -23,6 +23,8 @@ import {
   Role,
   Permission
 } from './middleware/rbac';
+import { ipFilterMiddleware } from './middleware/ipFilter';
+import { inputSanitizationMiddleware } from './middleware/sanitizer';
 import {
   createRateLimitMiddleware,
   authRateLimit,
@@ -51,6 +53,12 @@ app.use(cors({
 
 // Request logging
 app.use(morgan('combined'));
+
+// Apply IP filtering middleware
+app.use(ipFilterMiddleware());
+
+// Apply input sanitization middleware
+app.use(inputSanitizationMiddleware());
 
 // Global rate limiting (IP-based with role-based enhancements)
 app.use(createRateLimitMiddleware());
