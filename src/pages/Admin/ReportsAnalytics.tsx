@@ -76,118 +76,73 @@ const ReportsAnalytics: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Sample data for demonstration
+  // Data will be fetched from API
   const dashboardMetrics = [
     {
       title: 'Total Active Members',
-      value: '2,350',
-      change: '+2.5%',
+      value: '0',
+      change: '0%',
       trend: 'up',
       color: 'from-blue-500 to-blue-600',
       icon: Users
     },
     {
       title: 'Total Employers',
-      value: '45',
-      change: '+1',
+      value: '0',
+      change: '0',
       trend: 'up',
       color: 'from-green-500 to-green-600',
       icon: Globe
     },
     {
       title: 'Monthly Contributions',
-      value: 'KES 6.2M',
-      change: '+8.2%',
+      value: 'KES 0',
+      change: '0%',
       trend: 'up',
       color: 'from-purple-500 to-purple-600',
       icon: DollarSign
     },
     {
       title: 'Total Claims Paid',
-      value: 'KES 1.8M',
-      change: '+12.3%',
+      value: 'KES 0',
+      change: '0%',
       trend: 'up',
       color: 'from-yellow-500 to-yellow-600',
       icon: FileText
     },
     {
       title: 'Pending Claims',
-      value: '23',
-      change: '-5%',
+      value: '0',
+      change: '0%',
       trend: 'down',
       color: 'from-orange-500 to-orange-600',
       icon: Clock
     },
     {
       title: 'New Registrations',
-      value: '42',
-      change: '+15%',
+      value: '0',
+      change: '0%',
       trend: 'up',
       color: 'from-indigo-500 to-indigo-600',
       icon: Plus
     },
     {
       title: 'Missed Contributions',
-      value: '8',
-      change: '-2',
+      value: '0',
+      change: '0',
       trend: 'down',
       color: 'from-red-500 to-red-600',
       icon: AlertTriangle
     }
   ];
 
-  const contributionData = [
-    { month: 'Jan', employee: 2400000, employer: 2600000, avc: 450000, expected: 5600000, received: 5450000 },
-    { month: 'Feb', employee: 2450000, employer: 2650000, avc: 480000, expected: 5700000, received: 5580000 },
-    { month: 'Mar', employee: 2480000, employer: 2680000, avc: 520000, expected: 5800000, received: 5680000 },
-    { month: 'Apr', employee: 2520000, employer: 2720000, avc: 560000, expected: 5900000, received: 5800000 },
-    { month: 'May', employee: 2550000, employer: 2750000, avc: 580000, expected: 6000000, received: 5880000 },
-    { month: 'Jun', employee: 2600000, employer: 2800000, avc: 600000, expected: 6100000, received: 6000000 }
-  ];
-
-  const memberActivityData = [
-    { date: '2024-01-01', logins: 156, selfService: 89, active: 234, inactive: 45 },
-    { date: '2024-01-02', logins: 143, selfService: 76, active: 267, inactive: 38 },
-    { date: '2024-01-03', logins: 178, selfService: 92, active: 298, inactive: 42 },
-    { date: '2024-01-04', logins: 134, selfService: 67, active: 245, inactive: 56 },
-    { date: '2024-01-05', logins: 189, selfService: 103, active: 312, inactive: 33 },
-    { date: '2024-01-06', logins: 167, selfService: 85, active: 278, inactive: 47 },
-    { date: '2024-01-07', logins: 145, selfService: 72, active: 256, inactive: 51 }
-  ];
-
-  const claimsData = [
-    { type: 'Retirement', approved: 12, rejected: 1, pending: 3, avgProcessTime: 14, totalPayout: 1200000 },
-    { type: 'Death-in-service', approved: 8, rejected: 0, pending: 2, avgProcessTime: 21, totalPayout: 800000 },
-    { type: 'Withdrawal', approved: 15, rejected: 3, pending: 5, avgProcessTime: 7, totalPayout: 450000 },
-    { type: 'Medical', approved: 34, rejected: 2, pending: 8, avgProcessTime: 5, totalPayout: 680000 }
-  ];
-
-  const votingData = [
-    { session: 'Annual Elections 2024', status: 'Completed', turnout: 78.5, method: 'USSD/Web', results: 'Finalized' },
-    { session: 'Budget Approval', status: 'Active', turnout: 45.2, method: 'Web', results: 'Pending' },
-    { session: 'Policy Changes', status: 'Scheduled', turnout: 0, method: 'USSD', results: 'Not Started' }
-  ];
-
-  const benefitStatements = [
-    { member: 'John Doe', employer: 'ABC Corp', balance: 450000, projection: 1200000, lastGenerated: '2024-01-15' },
-    { member: 'Jane Smith', employer: 'XYZ Ltd', balance: 680000, projection: 1800000, lastGenerated: '2024-01-14' },
-    { member: 'Bob Johnson', employer: 'DEF Inc', balance: 320000, projection: 850000, lastGenerated: '2024-01-13' },
-    { member: 'Alice Brown', employer: 'GHI Co', balance: 780000, projection: 2100000, lastGenerated: '2024-01-12' }
-  ];
-
-  const systemAlerts = [
-    { type: 'Missed Contributions', count: 8, severity: 'High', description: 'ABC Corp - 45 days overdue' },
-    { type: 'Medical Bills', count: 3, severity: 'Medium', description: 'Kenyatta Hospital - 60 days overdue' },
-    { type: 'Invalid Data', count: 12, severity: 'Low', description: 'Duplicate beneficiary records' },
-    { type: 'Incomplete Claims', count: 5, severity: 'Medium', description: 'Missing supporting documents' }
-  ];
-
-  const auditTrail = [
-    { timestamp: '2024-01-15 10:30:00', user: 'admin@pension.gov', action: 'Member Registration', details: 'New member John Doe registered', ipAddress: '192.168.1.100' },
-    { timestamp: '2024-01-15 09:45:00', user: 'finance@pension.gov', action: 'Contribution Update', details: 'Monthly contributions updated for ABC Corp', ipAddress: '192.168.1.101' },
-    { timestamp: '2024-01-15 08:20:00', user: 'medical@pension.gov', action: 'Claim Approval', details: 'Medical claim approved for Jane Smith', ipAddress: '192.168.1.102' },
-    { timestamp: '2024-01-14 16:15:00', user: 'admin@pension.gov', action: 'System Configuration', details: 'Interest rate updated to 12.5%', ipAddress: '192.168.1.100' }
-  ];
+  const contributionData: any[] = [];
+  const memberActivityData: any[] = [];
+  const claimsData: any[] = [];
+  const votingData: any[] = [];
+  const benefitStatements: any[] = [];
+  const systemAlerts: any[] = [];
+  const auditTrail: any[] = [];
 
   const refreshData = async () => {
     setRefreshing(true);
@@ -429,43 +384,18 @@ const ReportsAnalytics: React.FC = () => {
         <Card>
           <h3 className="text-lg font-semibold mb-4">Most Active Users</h3>
           <div className="space-y-3">
-            {[
-              { name: 'John Doe', logins: 45, lastLogin: '2024-01-15' },
-              { name: 'Jane Smith', logins: 38, lastLogin: '2024-01-14' },
-              { name: 'Bob Johnson', logins: 32, lastLogin: '2024-01-15' },
-              { name: 'Alice Brown', logins: 29, lastLogin: '2024-01-13' }
-            ].map((user, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-gray-600">Last login: {user.lastLogin}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-blue-600">{user.logins}</p>
-                  <p className="text-xs text-gray-500">logins</p>
-                </div>
-              </div>
-            ))}
+            <div className="text-center py-8 text-gray-500">
+              <p>No active users data available</p>
+            </div>
           </div>
         </Card>
 
         <Card>
           <h3 className="text-lg font-semibold mb-4">Membership Status</h3>
           <div className="space-y-3">
-            {[
-              { status: 'Active', count: 2156, color: 'bg-green-500' },
-              { status: 'Inactive', count: 94, color: 'bg-yellow-500' },
-              { status: 'Retired', count: 78, color: 'bg-blue-500' },
-              { status: 'Deceased', count: 22, color: 'bg-gray-500' }
-            ].map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-3 ${item.color}`}></div>
-                  <span className="text-sm font-medium">{item.status}</span>
-                </div>
-                <span className="text-sm font-bold">{item.count}</span>
-              </div>
-            ))}
+            <div className="text-center py-8 text-gray-500">
+              <p>No membership status data available</p>
+            </div>
           </div>
         </Card>
       </div>
@@ -549,11 +479,7 @@ const ReportsAnalytics: React.FC = () => {
         <Card>
           <h3 className="text-lg font-semibold mb-4">Voter Turnout by Method</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={[
-              { method: 'USSD', turnout: 65 },
-              { method: 'Web', turnout: 45 },
-              { method: 'Admin', turnout: 12 }
-            ]}>
+            <BarChart data={[]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="method" />
               <YAxis />
@@ -566,19 +492,8 @@ const ReportsAnalytics: React.FC = () => {
         <Card>
           <h3 className="text-lg font-semibold mb-4">Real-time Results</h3>
           <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-medium text-blue-900">Annual Elections 2024</h4>
-              <p className="text-sm text-blue-700">Candidate A: 45% | Candidate B: 55%</p>
-              <div className="mt-2 bg-blue-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full" style={{ width: '55%' }}></div>
-              </div>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <h4 className="font-medium text-green-900">Budget Approval</h4>
-              <p className="text-sm text-green-700">Yes: 78% | No: 22%</p>
-              <div className="mt-2 bg-green-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full" style={{ width: '78%' }}></div>
-              </div>
+            <div className="text-center py-8 text-gray-500">
+              <p>No voting results available</p>
             </div>
           </div>
         </Card>
@@ -705,12 +620,7 @@ const ReportsAnalytics: React.FC = () => {
         <Card>
           <h3 className="text-lg font-semibold mb-4">Employer Comparison</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={[
-              { employer: 'ABC Corp', amount: 2800000 },
-              { employer: 'XYZ Ltd', amount: 1900000 },
-              { employer: 'DEF Inc', amount: 1200000 },
-              { employer: 'GHI Co', amount: 800000 }
-            ]}>
+            <BarChart data={[]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="employer" />
               <YAxis />
@@ -769,23 +679,42 @@ const ReportsAnalytics: React.FC = () => {
           <div>
             <h4 className="font-medium mb-3">Quick Exports</h4>
             <div className="space-y-3">
-              {[
-                { label: 'Contributions', icon: DollarSign },
-                { label: 'Claims', icon: FileText },
-                { label: 'Memberships', icon: Users },
-                { label: 'Statements', icon: Eye }
-              ].map((item, index) => (
-                <Button
-                  key={index}
-                  variant="secondary"
-                  className="w-full justify-start"
-                  onClick={() => exportData(item.label.toLowerCase())}
-                  disabled={isExporting}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  Export {item.label}
-                </Button>
-              ))}
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+                onClick={() => exportData('contributions')}
+                disabled={isExporting}
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
+                Export Contributions
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+                onClick={() => exportData('claims')}
+                disabled={isExporting}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Export Claims
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+                onClick={() => exportData('memberships')}
+                disabled={isExporting}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Export Memberships
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+                onClick={() => exportData('statements')}
+                disabled={isExporting}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Export Statements
+              </Button>
             </div>
           </div>
           <div>
